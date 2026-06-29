@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schema.stryker-mutator.io/stryker-config.json",
+  "mutate": [
+    "src/services/permissionService.js",
+    "src/services/expenseService.js",
+    "src/services/settlementService.js"
+  ],
+  "testRunner": "jest",
+  "jest": {
+    "projectType": "custom",
+    "configFile": "jest.config.js"
+  },
+  "reporters": [
+    "progress",
+    "clear-text",
+    "html"
+  ],
+  "concurrency": 2,
+  "thresholds": {
+    "high": 80,
+    "low": 70,
+    "break": 70
+  }
+}
