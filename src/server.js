@@ -23,7 +23,7 @@ const healthRoutes = require('./routes/healthRoutes');
 registerProcessErrorHandlers();
 
 const app = express();
-const PORT = process.env.SERVER_PORT || process.env.PORT || 5000;
+const PORT = process.env.PORT || 5000;
 
 // Enable security and compression
 app.use(helmet({

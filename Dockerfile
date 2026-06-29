@@ -21,8 +21,6 @@ RUN apk add --no-cache postgresql-client
 
 # Set environment defaults
 ENV NODE_ENV=production
-ENV SERVER_PORT=5000
-ENV PORT=5000
 
 # Copy runtime dependencies
 COPY --from=deps /app/node_modules ./node_modules
@@ -40,9 +38,5 @@ USER node
 
 # Expose server port
 EXPOSE 5000
-
-# Healthcheck targeting the native /health route
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD node -e "fetch('http://localhost:5000/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"
 
 CMD ["node", "src/server.js"]
