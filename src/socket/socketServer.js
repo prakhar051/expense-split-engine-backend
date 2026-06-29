@@ -52,10 +52,26 @@ async function emitGroupPresenceUpdate(groupId) {
   }
 }
 
+const clientUrlEnv = process.env.CLIENT_URL || 'http://localhost:5173';
+const allowedOrigins = clientUrlEnv.split(',').map(o => o.trim()).filter(Boolean);
+
+const corsOriginHandler = (origin, callback) => {
+  if (!origin) {
+    return callback(null, true);
+  }
+  const isAllowed = allowedOrigins.includes(origin);
+  if (isAllowed) {
+    callback(null, true);
+  } else {
+    const fallback = allowedOrigins.find(o => o.startsWith('https://')) || allowedOrigins[0];
+    callback(null, fallback);
+  }
+};
+
 function initSocketServer(httpServer) {
   io = new Server(httpServer, {
     cors: {
-      origin: process.env.CLIENT_URL || 'http://localhost:5173',
+      origin: corsOriginHandler,
       credentials: true
     },
     connectionStateRecovery: {

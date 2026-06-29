@@ -52,9 +52,25 @@ app.use((req, res, next) => {
   next();
 });
 
+const clientUrlEnv = process.env.CLIENT_URL || 'http://localhost:5173';
+const allowedOrigins = clientUrlEnv.split(',').map(o => o.trim()).filter(Boolean);
+
+const corsOriginHandler = (origin, callback) => {
+  if (!origin) {
+    return callback(null, true);
+  }
+  const isAllowed = allowedOrigins.includes(origin);
+  if (isAllowed) {
+    callback(null, true);
+  } else {
+    const fallback = allowedOrigins.find(o => o.startsWith('https://')) || allowedOrigins[0];
+    callback(null, fallback);
+  }
+};
+
 // Enable CORS with client URL configuration
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: corsOriginHandler,
   credentials: true
 }));
 
@@ -67,43 +83,14 @@ app.use(requestLogger);
 // Mount health routes under root
 app.use('/', healthRoutes);
 
+const swaggerUi = require('swagger-ui-express');
+const openApiDocument = require('./openapi.json');
+
 // Mount API Docs Swagger UI
 app.use('/api/docs/openapi.json', (req, res) => {
   res.sendFile(require('path').join(__dirname, 'openapi.json'));
 });
-app.use('/api/docs', (req, res) => {
-  res.send(`
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="Expense Split Engine API Documentation" />
-        <title>Expense Split Engine - API Documentation</title>
-        <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css" />
-      </head>
-      <body>
-        <div id="swagger-ui"></div>
-        <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js" charset="UTF-8"></script>
-        <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js" charset="UTF-8"></script>
-        <script>
-          window.onload = () => {
-            window.ui = SwaggerUIBundle({
-              url: '/api/docs/openapi.json',
-              dom_id: '#swagger-ui',
-              deepLinking: true,
-              presets: [
-                SwaggerUIBundle.presets.apis,
-                SwaggerUIStandalonePreset
-              ],
-              layout: "BaseLayout"
-            });
-          };
-        </script>
-      </body>
-    </html>
-  `);
-});
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
 
 const authRoutes  = require('./routes/authRoutes');
 const groupRoutes = require('./routes/groupRoutes');
