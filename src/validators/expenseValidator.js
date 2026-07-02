@@ -7,7 +7,7 @@ const createExpenseSchema = z.object({
   originalCurrency: z.enum(['INR', 'USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'SGD', 'AED']).default('INR').optional(),
   amount: z.number({ required_error: 'Amount is required' }).int('Amount must be an integer (in cents)').gt(0, 'Amount must be greater than 0'),
   groupId: z.string({ required_error: 'groupId is required' }).uuid('groupId must be a valid UUID'),
-  paidById: z.string().uuid('paidById must be a valid UUID').optional(), // optional for MULTI_PAYER
+  paidById: z.string().uuid('paidById must be a valid UUID').optional().nullable(), // optional for MULTI_PAYER
   splitType: z.enum(['EQUAL', 'EXACT', 'PERCENTAGE', 'SHARE', 'MULTI_PAYER'], { required_error: 'splitType is required' }),
   date: z.string().optional().nullable(),
   payers: z.array(
